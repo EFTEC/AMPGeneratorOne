@@ -1,0 +1,12 @@
+{
+    "name": "eftec/amp-generator-one",
+    "description": "It generates Google AMP sites using PHP",
+    "type": "library",
+    "license": "LGPLV3",
+    "authors": [
+        {
+            "name": "Jorge Patricio Castro Castillo",
+            "email": "jcastro@eftec.cl"
+        }],
+    "require": {}
+}
