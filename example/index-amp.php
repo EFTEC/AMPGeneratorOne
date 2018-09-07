@@ -102,4 +102,4 @@ $amp->setPadding(0,0)
     ->sectionFooter(new FooterModel("Copyright something(c)","See as desktop"));
 
 $amp->render(); // you could render to output
-$amp->renderToFile("example.html"); // or, you could render to file. PICK ONE
+$amp->renderToFile("example-generated.html"); // or, you could render to file. PICK ONE
