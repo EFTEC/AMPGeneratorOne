@@ -4,11 +4,11 @@ namespace eftec\AmpGeneratorOne;
  * Class AmpGeneratorOne
  * @copyright Jorge Castro Castillo
  * @license GPLV3
- * @version 0.2 2018-09-02
+ * @version 0.3 2018-09-07
  */
 class AmpGeneratorOne {
 
-    const VERSION=0.2;
+    const VERSION=0.3;
 
     private $result="";
     private $style;
@@ -55,11 +55,9 @@ class AmpGeneratorOne {
 
     /**
      * @param HeaderModel $param
-     
      */
     public function header($param) {
         $param->icon=$this->fixRelativeUrl($param->icon);
-
         $template= "<!DOCTYPE html>
         <html amp>
         <head>
@@ -287,16 +285,7 @@ class AmpGeneratorOne {
         }
         section.sidebar-open:before{content: '';position: fixed;top: 0;bottom: 0;right: 0;left: 0;background-color: rgba(0,0,0,0.2);z-index: 1040;}
         p{margin-top: 0;}
-        .ampsidebar amp-sidebar{min-width: 260px;z-index: 1050;background-color: {$this->sidebarColor};}
-        .ampsidebar amp-sidebar.open:after{content: '';position: absolute;top: 0;left: 0;bottom: 0;right: 0;background-color: red;}
-        .ampsidebar .open{transform: translateX(0%);display: block;}
-        .ampsidebar .builder-sidebar{background-color: {$this->sidebarColor};position: relative;height: 100vh;z-index: 1030;padding: 1rem 2rem;max-width: 20rem;}
-        .ampsidebar .headerbar{display: flex;flex-direction: column;justify-content: center;padding: .5rem 1rem;min-height: 70px;align-items: center;background: #ffffff;}
-        .ampsidebar .headerbar.sticky-nav{position: fixed;z-index: 1000;width: 100%;}
-        .ampsidebar button.sticky-but{position: fixed;}
-        .ampsidebar .brand{display: flex;align-items: center;align-self: flex-start;padding-right: 30px;}
-        .ampsidebar .brand p{margin: 0;padding: 0;}
-        .ampsidebar .brand-name{color: {$this->themecolor};}
+
         .ampsidebar .sidebar{padding: 1rem 0;margin: 0;}
         .ampsidebar .sidebar > li{list-style: none;display: flex;flex-direction: column;}
         .ampsidebar .sidebar a{display: block;text-decoration: none;margin-bottom: 10px;}
@@ -336,7 +325,7 @@ class AmpGeneratorOne {
 
 
         $this->header=$param;
-        $this->style=$template;
+        $this->result=$template;
         $this->resetDefault();
     }
 
@@ -357,6 +346,15 @@ class AmpGeneratorOne {
         }
         $template.= "</div></div></amp-sidebar>";
         $this->result.=$template;
+        $this->styleStack[]=".ampsidebar amp-sidebar{min-width: 260px;z-index: 1050;background-color: {$this->sidebarColor};}
+        .ampsidebar amp-sidebar.open:after{content: '';position: absolute;top: 0;left: 0;bottom: 0;right: 0;background-color: red;}
+        .ampsidebar .open{transform: translateX(0%);display: block;}
+        .ampsidebar .builder-sidebar{background-color: {$this->sidebarColor};position: relative;height: 100vh;z-index: 1030;padding: 1rem 2rem;max-width: 20rem;}
+        .ampsidebar button.sticky-but{position: fixed;}
+        .ampsidebar .brand{display: flex;align-items: center;align-self: flex-start;padding-right: 30px;}
+        .ampsidebar .brand p{margin: 0;padding: 0;}
+        .ampsidebar .brand-name{color: {$this->themecolor};}";
+
         $this->resetDefault();
     }
 
@@ -391,6 +389,8 @@ class AmpGeneratorOne {
         </button>
     </section>";
         $this->result.=$template;
+        $this->styleStack[]=".ampsidebar .headerbar{display: flex;flex-direction: column;justify-content: center;padding: .5rem 1rem;min-height: 70px;align-items: center;background: {$this->backgroundColor};}
+        .ampsidebar .headerbar.sticky-nav{position: fixed;z-index: 1000;width: 100%;}";
         $this->resetDefault();
     }
 
@@ -720,7 +720,7 @@ cin2;
         $this->styleStack[]=$style;
         $this->resetDefault();
     }
-    public function rawHtml($txt) {
+    public function sectionRaw($txt) {
         $this->result.=$txt;
     }
 
@@ -747,11 +747,38 @@ cin2;
     }
         $template.= "</div></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]=<<<cin2
-    .ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
-    .ampg-section{$this->secId} .text-block{margin: auto;}
-    .ampg-section{$this->secId} amp-img{text-align: center;}
-cin2;
+        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
+        .ampg-section{$this->secId} .text-block{margin: auto;}
+        .ampg-section{$this->secId} amp-img{text-align: center;}";
+        $this->resetDefault();
+    }
+    /**
+     * @param SectionModel $content
+     * @param $width
+     * @param $height
+     */
+    public function sectionImageContentLeft($content,$width,$height) {
+        $content->bgImage=$this->fixRelativeUrl($content->bgImage);
+        $this->secId++;
+        $template= "<section class='section{$this->secId} ampg-section{$this->secId}' id='section{$this->secId}'>          
+        <div class='container'>
+            <div class='ampg-row ampg-justify-content-center'>
+                <div class='text-block ampg-col-sm-12 ampg-col-md-6'>
+                    <h3 class='ampg-section-title ampg-fonts-style align-left {$this->classTextColor} text-5'>{$content->title}</h3>
+                    <p class='ampg-fonts-style ampg-text align-left {$this->classTextColor} text-7'>{$content->description}</p>";
+        if (count($content->buttons)) {
+            $template.="<div class='ampg-section-btn align-left'>".$this->genButton($content->buttons)."</div>";
+        }
+        $template.= "</div>
+                <div class='image-block ampg-col-sm-12 ampg-col-md-6'>
+                    <amp-img src='{$content->bgImage}' layout='responsive' width='{$width}' height='{$height}' alt='{$content->title}'>
+                    </amp-img>
+                </div>
+</div></div></section>";
+        $this->result.=$template;
+        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
+        .ampg-section{$this->secId} .text-block{margin: auto;}
+        .ampg-section{$this->secId} amp-img{text-align: center;}";
         $this->resetDefault();
     }
 
@@ -761,7 +788,7 @@ cin2;
     public function sectionTable($cols) {
         $this->secId++;
 
-        if (count($cols)<=0) {
+        if (count($cols)<=1) {
             return;
         }
         if (is_object($cols[0])) {
@@ -1136,9 +1163,20 @@ cin;
 
     public function render() {
         $r=implode("\n",$this->styleStack);
-        echo str_replace("/*inserthere*/",$r,$this->style);
+        $this->result=str_replace("/*inserthere*/",$r,$this->result);
 
         echo $this->result;
+    }
+
+    /**
+     * @param string $filename
+     * @return bool|int
+     */
+    public function renderToFile($filename) {
+        $r=implode("\n",$this->styleStack);
+        $this->result=str_replace("/*inserthere*/",$r,$this->result);
+
+        return file_put_contents($filename,$this->result);
     }
 
     //region private functions
