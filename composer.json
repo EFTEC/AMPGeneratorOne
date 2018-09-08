@@ -3,6 +3,11 @@
     "description": "It generates Google AMP sites using PHP",
     "type": "library",
     "license": "LGPLV3",
+    "extra": {
+      "branch-alias": {
+        "dev-master": "1.0-dev"
+      }
+    },
     "authors": [
         {
             "name": "Jorge Patricio Castro Castillo",

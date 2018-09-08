@@ -4,14 +4,13 @@ namespace eftec\AmpGeneratorOne;
  * Class AmpGeneratorOne
  * @copyright Jorge Castro Castillo
  * @license GPLV3
- * @version 0.3 2018-09-07
+ * @version 1.0 2018-09-08
  */
 class AmpGeneratorOne {
 
-    const VERSION=0.3;
+    const VERSION=1;
 
     private $result="";
-    private $style;
     private $styleStack=array();
     private $secId=0;
     private $backgroundColor="#ffffff";
@@ -46,17 +45,65 @@ class AmpGeneratorOne {
         $this->themecolor = $themecolor;
         $this->classSidebar=$classSidebar;
     }
+
+    /**
+     * @param $url
+     * @return string
+     */
     public function fixRelativeUrl($url) {
         if (strlen($url)<4) return $url;
         if (substr($url,0,4)=='http') return $url;
         if (substr($url,0,1)=='/') return $this->base.$url;
         if (substr($url,0,1)!='/') return $this->base.'/'.$url;
+        return "";
+    }
+
+    /**
+     * @param StructureModel $structured
+     * @return string
+     */
+    private function genStructured($structured) {
+        
+        $mark="<meta itemprop='name' content='{$structured->name}'>
+            <meta itemprop='description' content='{$structured->description}'>
+            <meta itemprop='image' content='{$structured->image}'>
+            <meta property='og:image' content='{$structured->image}'/>
+            <meta property='og:image:width' content='{$structured->imageWidth}'/>
+            <meta property='og:image:height' content='{$structured->imageHeight}'/>
+            <meta property='og:title' content='{$structured->name}'/>
+            <meta property='og:description' content='{$structured->description}'/>
+            <meta property='og:url' content='{$structured->url}'/>
+            <meta property='og:type' content='article'/>
+            <meta property='og:site_name' content='{$structured->name}'/>
+            <meta name='twitter:card' content='summary'>
+            <meta name='twitter:title' content='{$structured->name}'>
+            <meta name='twitter:description' content='{$structured->description}'>
+            <meta name='twitter:image' content='{$structured->image}'>
+            <meta name='twitter:site' content='{$structured->twittersite}'>
+            <meta name='twitter:creator' content='{$structured->twittercreator}'>
+            
+            <script type='application/ld+json'>            
+            {
+            \"@context\": \"http://schema.org/\",
+            \"@type\": \"WebSite\",
+            \"name\": \"{$structured->name}\",
+            \"url\": \"{$structured->url}\",
+            \"description\": \"{$structured->description}\",
+            \"image\":{\"@type\":\"ImageObject\",
+                \"url\":\"{$structured->image}\",
+                \"width\":{$structured->imageWidth},
+                \"height\":{$structured->imageHeight}
+                 }
+             }  
+            </script>";
+        return $mark;
     }
 
     /**
      * @param HeaderModel $param
+     * @param StructureModel $structured
      */
-    public function header($param) {
+    public function startAmp($param,$structured=null) {
         $param->icon=$this->fixRelativeUrl($param->icon);
         $template= "<!DOCTYPE html>
         <html amp>
@@ -66,8 +113,12 @@ class AmpGeneratorOne {
             <meta name='generator' content='AmpGeneratorOne ".self::VERSION.", github.com'>
             <meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1'>
             <link rel='shortcut icon' href='{$param->icon}' type='image/x-icon'>
-            <meta name='description' content='{$param->description}'>
-            <title>{$param->title}</title>
+            <meta name='description' content='{$param->description}'>";
+
+        if ($structured!=null) {
+            $template.=$this->genStructured($structured);
+        }
+        $template.="<title>{$param->title}</title>
             <link rel='canonical' href='{$this->canonical}'>
             <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.3.1/css/all.css' integrity='sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU' crossorigin='anonymous'>
             <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
@@ -363,7 +414,7 @@ class AmpGeneratorOne {
      * @param int $width
      * @param int $height
      */
-    public function  head($param,$width=55,$height=55) {
+    public function head($param,$width=55,$height=55) {
         $param->logo=$this->fixRelativeUrl($param->logo);
         $template= "<section class='menu ampsidebar' id='menu1'>
         <nav class='headerbar sticky-nav'>
@@ -406,6 +457,7 @@ class AmpGeneratorOne {
             $paddingTop=$this->paddingTop;
             $paddingBottom=$this->paddingBottom;
         }
+        $this->backgroundColor='#232323';
         if ($param->viewDesktop) {
             $goDestkop="<a href='{$this->canonical}'>{$param->viewDesktop}</a>";
         } else {
@@ -423,7 +475,7 @@ class AmpGeneratorOne {
         </body>
         </html>";
         $this->result.=$template;
-        $this->styleStack[]=".ampfooter{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: #232323;}
+        $this->styleStack[]=".ampfooter{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampfooter p{margin: 0;color: #ffffff;}";
         $this->resetDefault();
     }
@@ -461,6 +513,13 @@ class AmpGeneratorOne {
      * @param SectionModel $content
      */
     public function sectionFirst($content) {
+        if ($this->paddingTop===null) {
+            $paddingTop=120;
+            $paddingBottom=60;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
         $this->secId++;
         $template= "<section class='ampg-section content{$this->secId} ampg-section{$this->secId}' id='section{$this->secId}'>
@@ -469,7 +528,7 @@ class AmpGeneratorOne {
             </div>
         </section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 120px;padding-bottom: 60px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .ampg-title{padding-bottom: 1rem;}";
         $this->resetDefault();
     }
@@ -479,6 +538,7 @@ class AmpGeneratorOne {
      * @param bool $fullscreen
      */
     public function sectionImageButton($content,$fullscreen=true) {
+        $content->bgImage=$this->fixRelativeUrl($content->bgImage);
         if ($content->buttons<1) {
             die("Error:sectionImageButton must have at least a button");
         }
@@ -526,7 +586,7 @@ class AmpGeneratorOne {
             </div>
         </section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .ampg-text{margin-bottom: 0;}
         .ampg-section{$this->secId} .ampg-section-title{margin: 0;}";
         $this->resetDefault();
@@ -554,15 +614,15 @@ class AmpGeneratorOne {
             </div>
         </section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} blockquote{border-color: #ffc107;}";
         $this->resetDefault();
     }
 
     /**
-     * @param SectionModel[] $contents
+     * @param LinkModel[] $links
      */
-    public function sectionUL($contents) {
+    public function sectionUL($links) {
         if ($this->paddingTop===null) {
             $paddingTop=60;
             $paddingBottom=60;
@@ -576,21 +636,21 @@ class AmpGeneratorOne {
         <div class='ampg-container'>
             <div class='ampg-text counter-container ampg-fonts-style text-7'>
                 <ul>";
-        foreach($contents as $content) {
-            $template.="<li><strong>{$content->title}</strong>- {$content->description}&nbsp;".$this->genLink($content->url)."</li>\n";
+        foreach($links as $link) {
+            $template.="<li><strong>{$link->description}</strong>- {$link->description}&nbsp;".$link->url."</li>\n";
         }
         $template.= "</ul></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .counter-container ul{margin-bottom: 0;}
         .ampg-section{$this->secId} .counter-container ul li{color: inherit;margin-bottom: 1rem;list-style: none;}
         .ampg-section{$this->secId} .counter-container ul li:before{position: absolute;left: 0px;padding-top: 3px;content: '';display: inline-block;text-align: center;margin: 10px 15px;line-height: 20px;transition: all .2s;color: #ffffff;background: #007bff;width: 10px;height: 10px;border-radius: 50%;border-radius: 0;transform: rotate(45deg);}";
         $this->resetDefault();
     }
     /**
-     * @param SectionModel[] $contents
+     * @param LinkModel[] $links
      */
-    public function sectionOL($contents) {
+    public function sectionOL($links) {
         if ($this->paddingTop===null) {
             $paddingTop=60;
             $paddingBottom=60;
@@ -603,12 +663,12 @@ class AmpGeneratorOne {
     <div class='ampg-container'>
         <div class='ampg-text counter-container ampg-fonts-style text-7'>
             <ol>";
-        foreach($contents as $content) {
-            $template.='<li><strong>{$content->title}</strong>- {$content->description}&nbsp;'.$this->genLink($content->url).'</li>\n';
+        foreach($links as $link) {
+            $template.="<li><strong>{$link->description}</strong>- {$link->description}&nbsp;".$link->url."</li>\n";
         }
         $template.= "</ol></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .counter-container ol{margin-bottom: 0;counter-reset: myCounter;}
         .ampg-section{$this->secId} .counter-container ol li{margin-bottom: 2rem;}
         .ampg-section{$this->secId} .counter-container ol li{z-index: 3;list-style: none;padding-left: .5rem;}
@@ -636,7 +696,7 @@ class AmpGeneratorOne {
         }
         $template.= "</div></div></section>     ";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}";
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}";
         $this->resetDefault();
     }
 
@@ -669,8 +729,8 @@ class AmpGeneratorOne {
         $template.= "</div></div></section>  ";
         $this->result.=$template;
 
-        $this->styleStack[]=".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;{$this->genBackground()}}
-        .ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]=".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
+        .ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .ampg-row{margin: 0 15px;}
         @media (max-width: 991px){.ampg-section{$this->secId} .card{margin-bottom: 20px;}
         }
@@ -709,17 +769,14 @@ class AmpGeneratorOne {
 </section>
 cin2;
         $this->result.=$template;
-        if ($content->bgImage) {
-            $style = ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-image: url('{$content->bgImage}');}";
-        } else {
-            $style = ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color:{$this->backgroundColor};}";
-        }
+        $style = ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}";
         $style.= ".ampg-section{$this->secId} .ampg-section-subtitle{text-align: center;}
         .ampg-section{$this->secId} .ampg-text,.ampg-section{$this->secId} .ampg-section-btn{text-align: center;}
         .ampg-section{$this->secId} .ampg-section-title{text-align: center;}";
         $this->styleStack[]=$style;
         $this->resetDefault();
     }
+
     public function sectionRaw($txt) {
         $this->result.=$txt;
     }
@@ -730,6 +787,13 @@ cin2;
      * @param $height
      */
     public function sectionImageContent($content,$width,$height) {
+        if ($this->paddingTop===null) {
+            $paddingTop=30;
+            $paddingBottom=30;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
         $this->secId++;
         $template= "<section class='section{$this->secId} ampg-section{$this->secId}' id='section{$this->secId}'>          
@@ -747,7 +811,7 @@ cin2;
     }
         $template.= "</div></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .text-block{margin: auto;}
         .ampg-section{$this->secId} amp-img{text-align: center;}";
         $this->resetDefault();
@@ -758,6 +822,13 @@ cin2;
      * @param $height
      */
     public function sectionImageContentLeft($content,$width,$height) {
+        if ($this->paddingTop===null) {
+            $paddingTop=30;
+            $paddingBottom=30;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
         $this->secId++;
         $template= "<section class='section{$this->secId} ampg-section{$this->secId}' id='section{$this->secId}'>          
@@ -774,12 +845,12 @@ cin2;
                     <amp-img src='{$content->bgImage}' layout='responsive' width='{$width}' height='{$height}' alt='{$content->title}'>
                     </amp-img>
                 </div>
-</div></div></section>";
-        $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
-        .ampg-section{$this->secId} .text-block{margin: auto;}
-        .ampg-section{$this->secId} amp-img{text-align: center;}";
-        $this->resetDefault();
+        </div></div></section>";
+                $this->result.=$template;
+                $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
+                .ampg-section{$this->secId} .text-block{margin: auto;}
+                .ampg-section{$this->secId} amp-img{text-align: center;}";
+                $this->resetDefault();
     }
 
     /**
@@ -787,7 +858,13 @@ cin2;
      */
     public function sectionTable($cols) {
         $this->secId++;
-
+        if ($this->paddingTop===null) {
+            $paddingTop=75;
+            $paddingBottom=75;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         if (count($cols)<=1) {
             return;
         }
@@ -800,9 +877,9 @@ cin2;
 
 
         $template= "<section class='ampg-section{$this->secId}' id='section{$this->secId}'>     
-    <div class='container'>
-        <div class='ampg-row ampg-justify-content-center'>
-<table cellspacing=0 class='table ampg-text ampg-fonts-style' width=100%><thead><tr>";
+        <div class='container'>
+            <div class='ampg-row ampg-justify-content-center'>
+            <table cellspacing=0 class='table ampg-text ampg-fonts-style' width=100%><thead><tr>";
         foreach($headers as $h) {
             $template.="<th><p class='ampg-text tabletitle ampg-fonts-style align-left text-7'>{$h}</p></th>";
         }
@@ -814,22 +891,17 @@ cin2;
             }
             $template .= "</tr>";
         }
-        $template.=<<<cin
-</tbody></table>
-        </div>
-    </div>
-</section>
-cin;
+        $template.= "</tbody></table></div></div></section>";
         $this->result.=$template;
         $this->styleStack[]= "
-    .ampg-section{$this->secId}{padding-top: 75px;padding-bottom: 75px;background-color: {$this->backgroundColor};}
-    .ampg-section{$this->secId} table{width: 100%;border-collapse: collapse;min-width: 500px;}
-    .ampg-section{$this->secId} table td{border-top: none;padding: .75rem;}
-    .ampg-section{$this->secId} table th{border-top: none;padding: .75rem;border-bottom: 2px solid #cecece;}
-    .ampg-section{$this->secId} p{padding: 5px;margin: 0px;}
-    .ampg-section{$this->secId} .scroll{overflow-x: auto;}
-    .ampg-section{$this->secId} .wrapscroll{width: 100%;}
-    .ampg-section{$this->secId} .ampg-section-subtitle{color: #7f7e7e;margin-bottom: 2rem;}    ";
+        .ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
+        .ampg-section{$this->secId} table{width: 100%;border-collapse: collapse;min-width: 500px;}
+        .ampg-section{$this->secId} table td{border-top: none;padding: .75rem;}
+        .ampg-section{$this->secId} table th{border-top: none;padding: .75rem;border-bottom: 2px solid #cecece;}
+        .ampg-section{$this->secId} p{padding: 5px;margin: 0px;}
+        .ampg-section{$this->secId} .scroll{overflow-x: auto;}
+        .ampg-section{$this->secId} .wrapscroll{width: 100%;}
+        .ampg-section{$this->secId} .ampg-section-subtitle{color: #7f7e7e;margin-bottom: 2rem;}    ";
         $this->resetDefault();
     }
 
@@ -868,7 +940,7 @@ cin;
 
         $template.= "</div></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .image-block{margin: auto;width: 66%;width: 100%;}
         .ampg-section{$this->secId} amp-img{text-align: center;}
         .ampg-section{$this->secId} .ampg-text{margin: 0;padding: .5rem 0;padding: .5rem 15px;}
@@ -885,6 +957,13 @@ cin;
      * @param string $placeholder
      */
     public function sectionGMapFull($content,$googleMapUrl="",$placeholder="Google Map Loading...") {
+        if ($this->paddingTop===null) {
+            $paddingTop=60;
+            $paddingBottom=60;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         $googleMapUrl=($googleMapUrl=="")?"https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d13320.170086624597!2d-70.60383335!3d-33.422135749999995!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2scl!4v1536022894740":$googleMapUrl;
         $this->secId++;
         $urlStart=(count($content->url))?"<a href='".$content->url[0]->url."'>":"";
@@ -899,9 +978,8 @@ cin;
                 </amp-iframe></div>        
             </div>
         </section>";
-
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 60px;padding-bottom: 60px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .ampg-row{margin-left: 0;margin-right: 0;}
         .ampg-section{$this->secId} .ampg-section-title{padding-bottom: 3rem;}
         .ampg-section{$this->secId} .google-map{height: 25rem;position: relative;width: 100%;}
@@ -919,6 +997,13 @@ cin;
      * @param string $googleMapUrl
      */
     public function sectionGMapBoxed($content,$googleMapUrl="") {
+        if ($this->paddingTop===null) {
+            $paddingTop=90;
+            $paddingBottom=90;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
+        }
         $googleMapUrl=($googleMapUrl=="")?"https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d13320.170086624597!2d-70.60383335!3d-33.422135749999995!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2scl!4v1536022894740":$googleMapUrl;
         $this->secId++;
         $urlStart=(count($content->url))?"<a href='".$content->url[0]->url."'>":"";
@@ -944,7 +1029,7 @@ cin;
 
         $this->result.=$template;
         $this->styleStack[]= "
-        .ampg-section{$this->secId}{padding-top: 60px;padding-bottom: 60px;background-color: {$this->backgroundColor};}
+        .ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} .google-map{height: 25rem;position: relative;width: 100%;}
         .ampg-section{$this->secId} .google-map iframe{height: 100%;width: 100%;}
         .ampg-section{$this->secId} .google-map [data-state-details]{color: #6b6763;font-family: Montserrat;height: 1.5em;margin-top: -0.75em;padding-left: 1.25rem;padding-right: 1.25rem;position: absolute;text-align: center;top: 50%;width: 100%;}
@@ -1002,8 +1087,8 @@ cin;
                         </amp-img>
                     </div>";
             }
-        if (count($content->buttons)>0) {
-            $content->buttons[0]->url=$this->fixRelativeUrl($content->buttons[0]->url);
+        if ($content->title!='') {
+            if (count($content->buttons)) $content->buttons[0]->url=$this->fixRelativeUrl($content->buttons[0]->url);
 
             $template .= "
                     <div class='image-block ampg-col-sm-12 ampg-col-md-{$collg} align-center'>                        
@@ -1033,7 +1118,7 @@ cin;
 
         $template.= "</div></div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]=".ampg-section{$this->secId}{padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;{$this->genBackground()}}
+        $this->styleStack[]=".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
         .ampg-section{$this->secId} amp-img{text-align: center;}
         .ampg-section{$this->secId} .items-col .item{margin: 0;}
         .ampg-section{$this->secId} .item,.ampg-section{$this->secId} .group-title{color: #efefef;padding-top: 0;}
@@ -1060,6 +1145,13 @@ cin;
         } else {
             $colmd=6;
             $collg=floor(12/$num);
+        }
+        if ($this->paddingTop===null) {
+            $paddingTop=30;
+            $paddingBottom=30;
+        } else {
+            $paddingTop=$this->paddingTop;
+            $paddingBottom=$this->paddingBottom;
         }
 
         $template= "<section class='ampg-section ampg-section{$this->secId}' id='features{$this->secId}'>       
@@ -1095,7 +1187,7 @@ cin;
         }
         $template.= "</div></div></section>";
         $this->result.=$template;
-        $this->styleStack[]= ".ampg-section{$this->secId}{padding-top: 30px;padding-bottom: 30px;background-color: {$this->backgroundColor};}
+        $this->styleStack[]= ".ampg-section{$this->secId}{".$this->genModifyStyle($paddingTop,$paddingBottom)."}
             .ampg-section{$this->secId} .card{margin-bottom: 20px;position: relative;display: flex;-ms-flex-direction: column;flex-direction: column;min-width: 0;word-wrap: break-word;background-clip: border-box;border-radius: 0;width: 100%;min-height: 1px;}
             .ampg-section{$this->secId} .card .btn{margin: .4rem 4px;}
             .ampg-section{$this->secId} .card-title{margin: 0;}
@@ -1103,12 +1195,19 @@ cin;
             .ampg-section{$this->secId} amp-img{width: 100%;}";
         $this->resetDefault();
     }
+    private function genModifyStyle($paddingTop,$paddingBottom) {
+        if ($this->bgImage) {
+            return "padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-image: url('{$this->bgImage}');";
+        } else {
+            return "padding-top: {$paddingTop}px;padding-bottom: {$paddingBottom}px;background-color: {$this->backgroundColor};";
+        }
+    }
 
     /**
      * @param string $color Example #ffffff,rgb(30,30,30),white
      * @return $this
      */
-    public function backgroundColor($color) {
+    public function setBackgroundColor($color) {
         $this->backgroundColor=$color;
         return $this;
     }
@@ -1116,7 +1215,7 @@ cin;
      * @param string $bgImage
      * @return $this
      */
-    public function bgImage($bgImage) {
+    public function setBgImage($bgImage) {
         $this->bgImage=$bgImage;
         $this->bgImage=$this->fixRelativeUrl($this->bgImage);
         return $this;
@@ -1126,7 +1225,7 @@ cin;
      * @param string $class text-primary,text-secondary,text-success,text-info,text-warning,text-danger,text-white,text-black
      * @return $this
      */
-    public function classTextColor($class) {
+    public function setClassTextColor($class) {
         $this->classTextColor=$class;
         return $this;
     }
@@ -1137,7 +1236,7 @@ cin;
         return $this;
     }
 
-    public function resetDefault() {
+    private function resetDefault() {
         $this->backgroundColor=$this->defaultBackGroundColor;
         $this->classTextColor=$this->defaultClassTextColor;
         $this->paddingTop=null;
@@ -1223,14 +1322,6 @@ cin;
         }
 
         return $htmlLink;
-    }
-    private function genBackground() {
-        if ($this->bgImage) {
-            $style="background-image: url('{$this->bgImage}');";
-        } else {
-            $style="background-color: {$this->backgroundColor};";
-        }
-        return $style;
     }
 
     //endregion
@@ -1362,6 +1453,22 @@ class ButtonModel {
         $this->url = $url;
         $this->color = $color;
     }
+}
+class StructureModel {
+    var $name;
+    var $description;
+    var $url;
+    var $image;
+    var $imageWidth;
+    var $imageHeight;
+    /** @var string
+     * @see http://ogp.me/#types
+     */
+    var $ogtype="website";
+    var $twittercreator;
+    var $twittersite;
+    var $customJson;
 
 }
+
 //endregion
