@@ -2,7 +2,7 @@
     "name": "eftec/amp-generator-one",
     "description": "It generates Google AMP sites using PHP",
     "type": "library",
-    "license": "LGPLV3",
+    "license": "LGPL-3.0-only",
     "extra": {
       "branch-alias": {
         "dev-master": "1.0-dev"
