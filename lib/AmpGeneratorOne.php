@@ -4,7 +4,7 @@ namespace eftec\AmpGeneratorOne;
  * Class AmpGeneratorOne
  * @copyright Jorge Castro Castillo
  * @license GPLV3
- * @version 1.0 2018-09-08
+ * @version 1.1 2018-09-20
  */
 class AmpGeneratorOne {
 
@@ -578,8 +578,8 @@ class AmpGeneratorOne {
             <div class='container'>
                 <div class='ampg-row ampg-justify-content-center'>
                     <div class='ampg-col-sm-12 ampg-col-md-10 ampg-col-lg-8'>
-                        <h3 class='ampg-fonts-style ampg-section-title ampg-light text-2'>{$content->title}</h3>
-                        <p class='ampg-text ampg-fonts-style text-7'>
+                        <h3 class='ampg-fonts-style ampg-section-title ampg-light ".$this->classTextColor." text-2'>{$content->title}</h3>
+                        <p class='ampg-text ampg-fonts-style ".$this->classTextColor." text-7'>
                             {$content->description}</p>
                     </div>
                 </div>

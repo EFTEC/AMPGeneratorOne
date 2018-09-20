@@ -1,6 +1,12 @@
 # AMPGeneratorOne
+The library generates Google AMP sites using PHP by using procedural code.
 
-It generates Google AMP sites using PHP
+- [AMPGeneratorOne](#ampgeneratorone)
+  * [How it works?](#how-it-works-)
+  * [Validity](#validity)
+  * [Version](#version)
+  * [Example demo:](#example-demo-)
+
 
 This application simplifies (via code) the generation of an AMP site.  It's easiest to program, just a few of lines of code and that's it.
 
@@ -70,6 +76,7 @@ You could validate your amp on [Google search validation](https://search.google.
 
 ## Version
 
+* 1.1 2018-09-20 Fixed some bugs.
 * 1.0 2018-09-08 First non beta version
 * 0.3 2018-09-07 Cleaning the house.
 * 0.2 2018-09-06 Working version.
