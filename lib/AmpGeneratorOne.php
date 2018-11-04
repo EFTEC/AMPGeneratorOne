@@ -2,13 +2,14 @@
 namespace eftec\AmpGeneratorOne;
 /**
  * Class AmpGeneratorOne
- * @copyright Jorge Castro Castillo
+ * @copyright Jorge Castro Castillo 
  * @license GPLV3
- * @version 1.2 2018-11-03
+ * @version 1.3 2018-11-03
+ * @link https://github.com/EFTEC/AMPGeneratorOne
  */
 class AmpGeneratorOne {
 
-    const VERSION=1;
+    const VERSION=1.3;
 
     private $result="";
     private $styleStack=array();
