@@ -4,6 +4,7 @@ namespace eftec\test;
 
 use eftec\AmpGeneratorOne\AmpGeneratorOne;
 use eftec\AmpGeneratorOne\FooterModel;
+use eftec\AmpGeneratorOne\HeaderModel;
 use eftec\AmpGeneratorOne\HeadModel;
 use eftec\AmpGeneratorOne\SectionModel;
 use PHPUnit\Framework\TestCase;
@@ -53,7 +54,7 @@ class AmpGeneratorOneTest extends TestCase
 
     public function test_sectionAnalytics()
     {
-        
+        $this->ampGeneratorOne->startAmp(new HeaderModel());
         $this->ampGeneratorOne->sectionAnalytics('UA-XXXXX-Y');
     }
 
