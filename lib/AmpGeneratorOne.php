@@ -4,7 +4,7 @@ namespace eftec\AmpGeneratorOne;
  * Class AmpGeneratorOne
  * @copyright Jorge Castro Castillo
  * @license GPLV3
- * @version 1.1 2018-09-20
+ * @version 1.2 2018-11-03
  */
 class AmpGeneratorOne {
 
@@ -47,8 +47,10 @@ class AmpGeneratorOne {
     }
 
     /**
+     * Fix an url and convert a relative url into an absolute url
      * @param $url
      * @return string
+     * @test equals 'http://amp.canon.dom/some/url/image.jpg',this('some/url/image.jpg')
      */
     public function fixRelativeUrl($url) {
         if (strlen($url)<4) return $url;
@@ -59,8 +61,10 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates the social and seo structure (Twitter card, Facebook OG and Google Schema)
      * @param StructureModel $structured
      * @return string
+     * @test greaterThan 100, this(new StructuredModel())
      */
     private function genStructured($structured) {
         
@@ -100,6 +104,7 @@ class AmpGeneratorOne {
     }
 
     /**
+     * Start to generate an Amp site.
      * @param HeaderModel $param
      * @param StructureModel $structured
      */
@@ -381,8 +386,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * Generates a sidebar.
      * @param LinkModel[] $urls
-     
+     * @test void this([])
      */
     public function sidebar($urls) {
         $template= "<amp-sidebar id='sidebar' class='ampsidebar' layout='nodisplay' side='right'>
@@ -410,9 +416,11 @@ class AmpGeneratorOne {
     }
 
     /**
+     * Generates the header navigation
      * @param HeadModel $param
      * @param int $width
      * @param int $height
+     * @test void this(new HeadModel(),0,0)
      */
     public function head($param,$width=55,$height=55) {
         $param->logo=$this->fixRelativeUrl($param->logo);
@@ -446,7 +454,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates a footer of the amp site.
      * @param FooterModel $param
+     * @test void this(new FooterModel('copyright'))
      */
     public function sectionFooter($param) {
 
@@ -483,6 +493,8 @@ class AmpGeneratorOne {
     /**
      * Generates a Google Analytics section
      * @param string $account UA-XXXXX-Y
+     * @pretest $this->ampGeneratorOne->startAmp(new HeaderModel());
+     * @test void this('UA-XXXXX-Y')
      */
     public function sectionAnalytics($account) {
         $template= '<amp-analytics type="googleanalytics">
@@ -510,7 +522,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It draw a first section (hero style)
      * @param SectionModel $content
+     * @test void this(new SectionModel())
      */
     public function sectionFirst($content) {
         if ($this->paddingTop===null) {
@@ -534,10 +548,13 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates a section with a single button.
      * @param SectionModel $content
      * @param bool $fullscreen
+     * @test void this(new SectionModel(),false)
      */
     public function sectionImageButton($content,$fullscreen=true) {
+        if (count($content->buttons)==0) return; // no buttons
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
         if ($content->buttons<1) {
             die("Error:sectionImageButton must have at least a button");
@@ -563,7 +580,9 @@ class AmpGeneratorOne {
 
 
     /**
+     * It generates a section with a text.
      * @param SectionModel $content
+     * @test void this(new SectionModel())
      */
     public function sectionText($content) {
         if ($this->paddingTop===null) {
@@ -592,7 +611,9 @@ class AmpGeneratorOne {
         $this->resetDefault();
     }
     /**
+     * It generates a quote text
      * @param SectionModel $content
+     * @test void this(new SectionModel())
      */
     public function sectionTextQuote($content) {
         if ($this->paddingTop===null) {
@@ -620,7 +641,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates an unsorted list section
      * @param LinkModel[] $links
+     * @test void this([])
      */
     public function sectionUL($links) {
         if ($this->paddingTop===null) {
@@ -648,7 +671,9 @@ class AmpGeneratorOne {
         $this->resetDefault();
     }
     /**
+     * It generates a sorted list section
      * @param LinkModel[] $links
+     * @test void this([])
      */
     public function sectionOL($links) {
         if ($this->paddingTop===null) {
@@ -677,7 +702,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates a section with one (or more than one) buttons.
      * @param SectionModel $content
+     * @test void this(new SectionModel())
      */
     public function sectionButtons($content) {
         if ($this->paddingTop===null) {
@@ -701,7 +728,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates a section with columns
      * @param SectionModel[] $contents
+     * @test void this([])
      */
     public function sectionCols($contents) {
         if ($this->paddingTop===null) {
@@ -713,6 +742,7 @@ class AmpGeneratorOne {
         }
         $this->secId++;
         $num=count($contents);
+        if ($num==0) return;
         $colmd=6;
         $collg=floor(12/$num);
         $template= "<section class='ampg-section ampg-section{$this->secId}' id='section{$this->secId}'>    
@@ -740,7 +770,9 @@ class AmpGeneratorOne {
     }
 
     /**
+     * It generates a header central section. It could includes buttons.
      * @param SectionModel $content
+     * @test void this(new SectionModel())
      */
     public function sectionHeaderCentral($content) {
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
@@ -782,9 +814,11 @@ cin2;
     }
 
     /**
+     * It generates a section with an image content.
      * @param SectionModel $content
      * @param $width
      * @param $height
+     * @test void this(new SectionModel(),0,0)
      */
     public function sectionImageContent($content,$width,$height) {
         if ($this->paddingTop===null) {
@@ -817,9 +851,11 @@ cin2;
         $this->resetDefault();
     }
     /**
+     * It generates a section with a image content at the left.
      * @param SectionModel $content
      * @param $width
      * @param $height
+     * @test void this(new SectionModel(),0,0)
      */
     public function sectionImageContentLeft($content,$width,$height) {
         if ($this->paddingTop===null) {
@@ -854,7 +890,9 @@ cin2;
     }
 
     /**
+     * It generates a table
      * @param array $cols
+     * @test void this([])
      */
     public function sectionTable($cols) {
         $this->secId++;
@@ -907,9 +945,11 @@ cin2;
 
 
     /**
+     * It generates an image. The size of the image is required to calculate the ratio
      * @param SectionModel $content
      * @param int $width
      * @param int $height
+     * @test void this(new SectionModel(),0,0)
      */
     public function sectionImage($content,$width,$height) {
         $content->bgImage=$this->fixRelativeUrl($content->bgImage);
@@ -952,9 +992,11 @@ cin2;
     }
 
     /**
+     * It generates a google map section. It can't be locate at the 30% top of the site (Amp restriction)
      * @param SectionModel $content
      * @param string $googleMapUrl
      * @param string $placeholder
+     * @test void this(new SectionModel(),'mapurl','loading..')
      */
     public function sectionGMapFull($content,$googleMapUrl="",$placeholder="Google Map Loading...") {
         if ($this->paddingTop===null) {
@@ -993,8 +1035,10 @@ cin2;
         $this->resetDefault();
     }
     /**
+     * It generates a google map (boxed) section. It can't be locate at the 30% top of the site (Amp restriction)
      * @param SectionModel $content
      * @param string $googleMapUrl
+     * @test void this(new SectionModel(),'mapurl')
      */
     public function sectionGMapBoxed($content,$googleMapUrl="") {
         if ($this->paddingTop===null) {
@@ -1045,6 +1089,7 @@ cin2;
     }
 
     /**
+     * It generates a footer navigation
      * @param SectionModel $content
      * @param string $image
      * @param int $width
@@ -1053,8 +1098,9 @@ cin2;
      * @param LinkModel[] $navCol2
      * @param LinkModel[] $navCol3
      * @param LinkModel[] $navCol4
+     * @test void this(new SectionModel())
      */
-    public function sectionNavigation($content,$image="",$width=0,$height=0,$navCol1,$navCol2=null,$navCol3=null,$navCol4=null) {
+    public function sectionNavigation($content,$image="",$width=0,$height=0,$navCol1=null,$navCol2=null,$navCol3=null,$navCol4=null) {
         $image=$this->fixRelativeUrl($image);
         $this->secId++;
         if ($this->paddingTop===null) {
@@ -1069,6 +1115,7 @@ cin2;
         if ($image!="" || count($content->buttons)>0) $num++;
         $all=array();
         $all[]=$navCol1;
+        if ($navCol1===null) return; // nothing to show.
         if ($navCol2!==null) {$num++; $all[]=$navCol2;}
         if ($navCol3!==null) {$num++; $all[]=$navCol3;}
         if ($navCol4!==null) {$num++; $all[]=$navCol4;}
@@ -1131,14 +1178,17 @@ cin2;
 
 
     /**
+     * It generates a section with images and text.
      * @param SectionModel[] $contents
      * @param int $width
      * @param int $height
      * @param int $maxCol
+     * @test void this([],0,0,0)
      */
     public function sectionColImage($contents,$width,$height,$maxCol=3) {
         $this->secId++;
         $num=count($contents);
+        if ($num===0) return; //nothing to show.
         if ($num>$maxCol) {
             $colmd=6;
             $collg=floor(12/$maxCol);
@@ -1204,16 +1254,20 @@ cin2;
     }
 
     /**
+     * Fluent operation, it changes the background color of the next section
      * @param string $color Example #ffffff,rgb(30,30,30),white
      * @return $this
+     * @test InstanceOf AmpGeneratorOne::class,this('#ffffff')
      */
     public function setBackgroundColor($color) {
         $this->backgroundColor=$color;
         return $this;
     }
     /**
+     * Fluent operation, it changes the background image of the next section
      * @param string $bgImage
      * @return $this
+     * @test InstanceOf AmpGeneratorOne::class,this('img.jpg')
      */
     public function setBgImage($bgImage) {
         $this->bgImage=$bgImage;
@@ -1222,14 +1276,23 @@ cin2;
     }
 
     /**
+     * Fluent operation, it sets the class of the text
      * @param string $class text-primary,text-secondary,text-success,text-info,text-warning,text-danger,text-white,text-black
      * @return $this
+     * @test InstanceOf AmpGeneratorOne::class,this('text-primary')
      */
     public function setClassTextColor($class) {
         $this->classTextColor=$class;
         return $this;
     }
 
+    /**
+     * Fluent operation, it changes the padding
+     * @param $top
+     * @param $bottom
+     * @return $this
+     * @test InstanceOf AmpGeneratorOne::class,this(0,0)
+     */
     public function setPadding($top,$bottom) {
         $this->paddingTop=$top;
         $this->paddingBottom=$bottom;
@@ -1245,6 +1308,7 @@ cin2;
     }
 
     /**
+     * It reset to the default background color and text class
      * @param string $backGroundColor Example #ffffff,rgb(30,30,30),white
      * @param string $classTextColor  text-primary,text-secondary,text-success,text-info,text-warning,text-danger,text-white,text-black
      */
@@ -1253,21 +1317,24 @@ cin2;
         $this->defaultClassTextColor=$classTextColor;
     }
 
-    public function image($title,$description,$image) {
+    private function image($title,$description,$image) {
 
     }
-    public function table($title,$description,$image) {
+    private function table($title,$description,$image) {
 
     }
 
+    /**
+     * It renders the result page.
+     */
     public function render() {
         $r=implode("\n",$this->styleStack);
         $this->result=str_replace("/*inserthere*/",$r,$this->result);
-
         echo $this->result;
     }
 
     /**
+     * It renders the result to file
      * @param string $filename
      * @return bool|int
      */
@@ -1283,6 +1350,7 @@ cin2;
      * Generate the first link of an array only if array constains information or the link is not empty.
      * @param LinkModel|LinkModel[] $url
      * @return string
+     * @test equals 'xxx',this('url/link')
      */
     private function genLink($url) {
         if (is_array($url)) {

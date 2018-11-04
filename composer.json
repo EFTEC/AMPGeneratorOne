@@ -3,9 +3,14 @@
     "description": "It generates Google AMP sites using PHP",
     "type": "library",
     "license": "LGPL-3.0-only",
+    "autoload": {
+      "psr-4": {
+        "eftec\\": "lib/"
+      }
+    },
     "extra": {
       "branch-alias": {
-        "dev-master": "1.1-dev"
+        "dev-master": "1.3-dev"
       }
     },
     "authors": [
@@ -13,5 +18,8 @@
             "name": "Jorge Patricio Castro Castillo",
             "email": "jcastro@eftec.cl"
         }],
-    "require": {}
+    "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "^5.7"
+  }
 }
