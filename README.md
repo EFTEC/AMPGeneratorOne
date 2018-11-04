@@ -2,7 +2,7 @@
 The library generates Google AMP sites using PHP by using procedural code.
 
 [![Build Status](https://travis-ci.org/EFTEC/AMPGeneratorOne.svg?branch=master)](https://travis-ci.org/EFTEC/AMPGeneratorOne)
-[![Packagist](https://img.shields.io/packagist/v/eftec/ampgeneratorone.svg)](https://packagist.org/packages/eftec/ampgeneratorone)
+[![Packagist](https://img.shields.io/packagist/v/eftec/amp-generator-one.svg)](https://packagist.org/packages/eftec/amp-generator-one)
 [![Maintenance](https://img.shields.io/maintenance/yes/2018.svg)]()
 [![composer](https://img.shields.io/badge/composer-%3E1.6-blue.svg)]()
 [![php](https://img.shields.io/badge/php->5.6-green.svg)]()
