@@ -1516,7 +1516,7 @@ class ButtonModel {
      * @param string $url
      * @param string $color primary|success|warning|danger
      */
-    public function __construct(string $title="", string $url="#", string $color="primary")
+    public function __construct($title="", $url="#", $color="primary")
     {
         $this->title = $title;
         $this->url = $url;
