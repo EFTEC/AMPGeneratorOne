@@ -4,7 +4,7 @@ namespace eftec\AmpGeneratorOne;
  * Class AmpGeneratorOne
  * @copyright Jorge Castro Castillo 
  * @license GPLV3
- * @version 1.3 2018-11-03
+ * @version 1.4 2019-06-04
  * @link https://github.com/EFTEC/AMPGeneratorOne
  */
 class AmpGeneratorOne {
@@ -104,15 +104,16 @@ class AmpGeneratorOne {
         return $mark;
     }
 
-    /**
-     * Start to generate an Amp site.
-     * @param HeaderModel $param
-     * @param StructureModel $structured
-     */
-    public function startAmp($param,$structured=null) {
+	/**
+	 * Start to generate an Amp site.
+	 * @param HeaderModel $param
+	 * @param StructureModel $structured
+	 * @param string $lang language
+	 */
+    public function startAmp($param,$structured=null,$lang='en') {
         $param->icon=$this->fixRelativeUrl($param->icon);
         $template= "<!DOCTYPE html>
-        <html amp>
+        <html amp  lang=\"$lang\">
         <head>
             <meta charset='UTF-8'>
             <meta http-equiv='X-UA-Compatible' content='IE=edge'>
