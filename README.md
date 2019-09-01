@@ -391,6 +391,7 @@ You could validate your amp on [Google search validation](https://search.google.
 
 ## Version
 
+* 1.5 2019-08-31 Removed min-width in the sections.
 * 1.4 2019-06-04 Some fixes. 
 * 1.3 2018-11-03 Added Phpunit and travis.
 * 1.1 2018-09-20 Fixed some bugs.
